@@ -1,0 +1,8 @@
+<2.32> 
+SCAN:Found 5
+Num            SSID   Ch  RSSI   Sec    MAC Address	Suites
+ 1                  HAL 01 -64 WPA2PSK 00:1f:f3:c2:ef:3a AES/TKIPM-TKIP   3104
+ 2         09FX09023922 06 -44     WEP 00:23:97:8c:b1:e2    1104
+ 3         08FX11031227 06 -55     WEP 00:23:97:01:43:b2    1104
+ 4            5th Floor 11 -69     WEP 00:23:97:04:cd:c3    1104
+ 5           Vibromonk2 11 -48 WPA2PSK 54:75:d0:e3:a5:a1 AESM-AES  WPSPB 1100

@@ -1,0 +1,126 @@
+<html>
+<head>
+	<title>Bitponics | Set Up Your Device</title>
+	<style type="text/css">
+		#continue {
+			margin:30px;
+			padding:30px;
+			width:100px;
+			height:50px;
+			color:white;
+			background-color: gray;
+			cursor: pointer;
+		}
+		.network {
+			color:black;
+			background-color: yellow;
+			margin:10px;
+			padding:10px;
+		}
+	</style>
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script src="https://raw.github.com/jonnyreeves/jquery-Mustache/master/src/jquery-Mustache.js"></script>
+	<script src="https://raw.github.com/janl/mustache.js/master/mustache.js"></script>
+	<script type="text/javascript">
+		var dummyNetworkData = "<2.32> \n\
+SCAN:Found 5\n\
+Num            SSID   Ch  RSSI   Sec    MAC Address	Suites\n\
+ 1                  HAL 01 -64 WPA2PSK 00:1f:f3:c2:ef:3a AES/TKIPM-TKIP   3104\n\
+ 2         09FX09023922 06 -44     WEP 00:23:97:8c:b1:e2    1104\n\
+ 3         08FX11031227 06 -55     WEP 00:23:97:01:43:b2    1104\n\
+ 4            5th Floor 11 -69     WEP 00:23:97:04:cd:c3    1104\n\
+ 5           Vibromonk2 11 -48 WPA2PSK 54:75:d0:e3:a5:a1 AESM-AES  WPSPB 1100";
+ 		var networksArray = [];
+
+ 		// regexes
+ 		var netIDrx = /[0-9]{1,2}/i;
+ 		var netSSIDrx = /\d{1,2}\s+([\d\w\s]+)\s+\d/i;
+ 		var netRSSIrx = /\s(-\d\d)\s/i;
+ 		var netSecurityRx = /-\d\d\s+([\d\w]+)\s/i;
+
+ 		var networkTemplate = "<div id='' class='network'></div>"
+
+		function main(){
+			$.Mustache.add('network-template', '<div id="net{{id}}" class="network">{{ssid}} | {{rssi}} | {{sec}}</div>');
+
+			$('#continue').click(continueClick);
+		}
+
+		function parseNetworkData(data){
+			data = data.split('\n');
+			console.log(data);
+			data.splice(0, 3); // remove first 3 lines
+			// create array of network objects, then create table of UI elements in #networks
+			for (var i = 0; i < data.length; i++) {
+				data[i] = data[i].trim();
+				var thisID = netIDrx.exec(data[i])[0];
+				var thisSSID = netSSIDrx.exec(data[i])[1];
+				var thisRSSI = netRSSIrx.exec(data[i])[1];
+				var thisSec = netSecurityRx.exec(data[i])[1];
+				//console.log('id: '+thisID+' / ssid: '+thisSSID+' / rssi: '+thisRSSI+' / sec: '+thisSec);
+				networksArray.push({
+					id:thisID,
+					ssid:thisSSID,
+					rssi:thisRSSI,
+					sec:thisSec
+				});
+			};
+
+		}
+
+		function makeNetworks(){
+			$.each(networksArray, function(i,o){
+				console.log(o);
+				$('#networks').append($.Mustache.render('network-template', o));
+			});
+		}
+
+		function continueClick(e){
+			//try to make a request from the hardcoded IP address
+			$.ajax({
+				url: 'http://10.0.0.1',
+				method: 'get',
+				data: {},
+				success: gotNetworkData,
+				error: networkRequestError
+			});
+			//gotNetworkData(dummyNetworkData);
+		}
+
+		function gotNetworkData(data){
+			//console.log('gotNetworkData: '+data);
+			$('#continue').hide();
+			parseNetworkData(data);
+			makeNetworks();
+		}
+
+		function networkRequestError(e){
+			console.log('networkRequestError: '+e);
+		}
+
+		$(main);
+
+		// Utility
+
+		Array.prototype.clean = function(deleteValue) {
+		  for (var i = 0; i < this.length; i++) {
+		    if (this[i] == deleteValue) {         
+		      this.splice(i, 1);
+		      i--;
+		    }
+		  }
+		  return this;
+		};
+
+	</script>
+</head>
+<body>
+
+	<div id='container'>
+		Connect to the WiFly Ad-hoc Network, then
+		<div id='continue'>Click Here to Continue</div>
+		<div id='networks'></div>
+	</div>
+
+</body>
+</html>
