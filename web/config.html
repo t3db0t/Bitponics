@@ -31,6 +31,7 @@ Num            SSID   Ch  RSSI   Sec    MAC Address	Suites\n\
  4            5th Floor 11 -69     WEP 00:23:97:04:cd:c3    1104\n\
  5           Vibromonk2 11 -48 WPA2PSK 54:75:d0:e3:a5:a1 AESM-AES  WPSPB 1100";
  		var networksArray = [];
+ 		var adhocHost = "http://169.254.1.1";
 
  		// regexes
  		var netIDrx = /[0-9]{1,2}/i;
@@ -44,6 +45,22 @@ Num            SSID   Ch  RSSI   Sec    MAC Address	Suites\n\
 			$.Mustache.add('network-template', '<div id="net{{id}}" class="network">{{ssid}} | {{rssi}} | {{sec}}</div>');
 
 			$('#continue').click(continueClick);
+			$('#customSubmit').click(submitClick);
+		}
+
+		function submitClick(e){
+			$.get(
+				adhocHost+"/config",
+				{
+					name: $('#customSSID').val(),
+					pass: $('#customPass').val(),
+				},
+				submitSuccess
+			);
+		}
+
+		function submitSuccess(data){
+			console.log("submit success: "+data);
 		}
 
 		function parseNetworkData(data){
@@ -78,9 +95,8 @@ Num            SSID   Ch  RSSI   Sec    MAC Address	Suites\n\
 		function continueClick(e){
 			//try to make a request from the hardcoded IP address
 			$.ajax({
-				url: 'http://10.0.0.1',
+				url: adhocHost+'/scanlist',
 				method: 'get',
-				data: {},
 				success: gotNetworkData,
 				error: networkRequestError
 			});
@@ -88,10 +104,11 @@ Num            SSID   Ch  RSSI   Sec    MAC Address	Suites\n\
 		}
 
 		function gotNetworkData(data){
-			//console.log('gotNetworkData: '+data);
+			console.log('gotNetworkData: '+data);
 			$('#continue').hide();
-			parseNetworkData(data);
-			makeNetworks();
+			$('#networks').append(data);
+			//parseNetworkData(data);
+			//makeNetworks();
 		}
 
 		function networkRequestError(e){
@@ -120,6 +137,13 @@ Num            SSID   Ch  RSSI   Sec    MAC Address	Suites\n\
 		Connect to the WiFly Ad-hoc Network, then
 		<div id='continue'>Click Here to Continue</div>
 		<div id='networks'></div>
+		<div id='customNetwork'>
+			<input id='customSSID' type='text' placeholder="Wifi Network Name"></input>
+			<br/><br/>
+			<input id='customPass' type='password' placeholder="Password"></input>
+			<br/><br/>
+			<input id='customSubmit' value='Submit' type='button'></input>
+		</div>
 	</div>
 
 </body>
